@@ -3060,6 +3060,7 @@ JS;
             '{{customer_name}}',
             '{{customer_email}}',
             '{{order_total}}',
+            '{{comentarios_cliente}}',
             '{{estado_operacional}}',
             '{{fecha_prevista}}',
             '{{tipo_envio}}',
@@ -5155,6 +5156,7 @@ JS;
             : '';
 
         $internal_comment   = wp_strip_all_tags( (string) tradutema_array_get( $meta, 'comentario_interno', '' ) );
+        $customer_comments  = wp_strip_all_tags( (string) $order->get_customer_note() );
         $order_email  = sanitize_email( $order->get_billing_email() );
         $drive_links  = $this->resolve_order_drive_links( $order );
         $upload_link  = $this->generate_upload_to_client_link( $order );
@@ -5168,6 +5170,7 @@ JS;
             '{{customer_name}}'              => $customer_name,
             '{{customer_email}}'             => $order_email ? $order_email : '',
             '{{order_total}}'                => wp_strip_all_tags( $order->get_formatted_order_total() ),
+            '{{comentarios_cliente}}'        => $customer_comments,
             '{{estado_operacional}}'         => $status_label,
             '{{fecha_prevista}}'             => $expected_date,
             '{{tipo_envio}}'                 => $this->resolve_order_shipping_type( $order, $meta ),
