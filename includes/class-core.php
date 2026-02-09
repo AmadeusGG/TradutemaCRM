@@ -738,6 +738,21 @@ body.tradutema-crm-admin .tooltip-inner {
     font-size: 1.05rem;
 }
 
+.tradutema-crm-woo-comment-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 999px;
+    border: 1px solid rgba(49, 46, 129, 0.3);
+    background: rgba(255, 255, 255, 0.8);
+    color: #312e81;
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: help;
+}
+
 .tradutema-crm-section-provider {
     border-color: #bae6fd;
     background: #f0f9ff;
@@ -2033,6 +2048,7 @@ JS;
         $order_logs      = array();
         $order_has_shipping_details = false;
         $assigned_provider_details = null;
+        $order_customer_note = '';
 
         $estado_operacion          = tradutema_crm_operational_statuses();
         $proveedores               = $this->get_proveedores();
@@ -2374,6 +2390,7 @@ JS;
 
         if ( $order_object ) {
             $order_shipping_type = $this->resolve_order_shipping_type( $order_object, $order_meta );
+            $order_customer_note = trim( wp_strip_all_tags( (string) $order_object->get_customer_note() ) );
         }
 
         $proveedores_indexed = $all_proveedores_indexed;
@@ -2518,6 +2535,18 @@ JS;
                                     <div class="col-12 col-md-6 col-xl-3">
                                         <p class="text-muted mb-1"><?php esc_html_e( 'Tipo de envío', 'tradutema-crm' ); ?></p>
                                         <p class="mb-0"><?php echo $order_shipping_type ? esc_html( $order_shipping_type ) : '<span class="text-muted">&mdash;</span>'; ?></p>
+                                    </div>
+                                </div>
+                                <div class="row g-3 g-xl-4 mb-3">
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <p class="text-muted mb-1"><?php esc_html_e( 'Comentario del cliente', 'tradutema-crm' ); ?></p>
+                                        <p class="mb-0">
+                                            <?php if ( '' !== $order_customer_note ) : ?>
+                                                <span class="tradutema-crm-woo-comment-badge" data-bs-toggle="tooltip" data-bs-placement="auto" title="<?php echo esc_attr( $order_customer_note ); ?>" aria-label="<?php esc_attr_e( 'Ver comentario del cliente', 'tradutema-crm' ); ?>">💬</span>
+                                            <?php else : ?>
+                                                <span class="text-muted">&mdash;</span>
+                                            <?php endif; ?>
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
