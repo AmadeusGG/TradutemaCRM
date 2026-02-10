@@ -3708,10 +3708,6 @@ JS;
      * @return bool
      */
     private function date_filter_matches_candidate( array $filter, $candidate ) {
-        if ( preg_match( '/^\d{1,2}:\d{2}(?::\d{2})?$/', trim( (string) $candidate ) ) ) {
-            return false;
-        }
-
         $timestamp = $this->get_datetime_timestamp( $candidate );
 
         if ( null !== $timestamp ) {
