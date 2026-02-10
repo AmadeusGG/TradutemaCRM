@@ -3664,6 +3664,10 @@ JS;
             return null;
         }
 
+        if ( $this->is_time_only_value( $value ) ) {
+            return null;
+        }
+
         $normalized = str_replace( array( '.', '-', ' ' ), '/', $value );
 
         if ( preg_match( '/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/', $normalized, $matches ) ) {
@@ -3708,6 +3712,10 @@ JS;
      * @return bool
      */
     private function date_filter_matches_candidate( array $filter, $candidate ) {
+        if ( $this->is_time_only_value( $candidate ) ) {
+            return false;
+        }
+
         $timestamp = $this->get_datetime_timestamp( $candidate );
 
         if ( null !== $timestamp ) {
@@ -3739,6 +3747,22 @@ JS;
         }
 
         return $candidate_year === (int) $filter['year'];
+    }
+
+    /**
+     * Comprueba si el valor contiene únicamente una hora.
+     *
+     * @param string $value Valor a evaluar.
+     * @return bool
+     */
+    private function is_time_only_value( $value ) {
+        $value = trim( (string) $value );
+
+        if ( '' === $value ) {
+            return false;
+        }
+
+        return 1 === preg_match( '/^\d{1,2}:\d{2}(?::\d{2})?$/', $value );
     }
 
     /**
