@@ -1611,7 +1611,7 @@ JS;
                 <div class="tradutema-crm-header">
                     <div class="tradutema-crm-header-bar">
                         <div class="tradutema-crm-header-group">
-                            <h1><?php esc_html_e( 'Gestión de pedidos. Listando últimos 2 meses filtra por Desde-Hasta si quieres listar otras fechas.', 'tradutema-crm' ); ?></h1>
+                            <h1><?php esc_html_e( 'Gestión de pedidos. Listando último mes filtra por Desde-Hasta si quieres listar otras fechas.', 'tradutema-crm' ); ?></h1>
                         </div>
                         <div class="tradutema-crm-header-actions">
                             <button type="button" class="tradutema-crm-sidebar-toggle" aria-controls="tradutema-crm-sidebar" aria-expanded="false" aria-label="<?php echo esc_attr__( 'Mostrar menú', 'tradutema-crm' ); ?>" data-label-expanded="<?php echo esc_attr__( 'Ocultar menú', 'tradutema-crm' ); ?>" data-label-collapsed="<?php echo esc_attr__( 'Mostrar menú', 'tradutema-crm' ); ?>">
@@ -3343,11 +3343,15 @@ JS;
             }
         }
 
+        if ( '' !== $filters['estado_operacional'] ) {
+            $filters['estado_operacional'] = $this->normalize_operational_status_value( $filters['estado_operacional'] );
+        }
+
         return $filters;
     }
 
     /**
-     * Obtiene el ID de pedido correspondiente al límite de los dos últimos meses.
+     * Obtiene el ID de pedido correspondiente al límite del último mes.
      *
      * @return int
      */
@@ -3371,7 +3375,7 @@ JS;
         $timezone = function_exists( 'wp_timezone' ) ? wp_timezone() : new \DateTimeZone( $timezone_string );
         $date     = new \DateTime( 'now', $timezone );
 
-        $date->modify( '-2 months' );
+        $date->modify( '-1 month' );
 
         $threshold_datetime = $date->format( 'Y-m-d H:i:s' );
 
@@ -3424,7 +3428,8 @@ JS;
         }
 
         if ( ! empty( $filters['estado_operacional'] ) ) {
-            $where[]  = 'om.estado_operacional = %s';
+            $where[]  = 'COALESCE(om.estado_operacional, %s) = %s';
+            $params[] = 'recibido';
             $params[] = $filters['estado_operacional'];
         }
 
@@ -3613,6 +3618,7 @@ JS;
             return true;
         }
 
+        $filter = $this->parse_filter_date_value( $filter_value );
         $candidates = array();
 
         if ( is_array( $date_parts ) ) {
@@ -3629,24 +3635,114 @@ JS;
                 continue;
             }
 
-            $normalized_candidate = str_replace( array( '-', '.' ), '/', $candidate );
-
-            if ( false !== stripos( $normalized_candidate, $filter_value ) ) {
+            if ( $filter && $this->date_filter_matches_candidate( $filter, $candidate ) ) {
                 return true;
             }
 
-            $timestamp = $this->get_datetime_timestamp( $candidate );
+            if ( ! $filter ) {
+                $normalized_candidate = str_replace( array( '-', '.' ), '/', $candidate );
 
-            if ( null !== $timestamp ) {
-                $formatted = wp_date( 'd/m/y', $timestamp );
-
-                if ( false !== stripos( $formatted, $filter_value ) ) {
+                if ( false !== stripos( $normalized_candidate, $filter_value ) ) {
                     return true;
                 }
             }
         }
 
         return false;
+    }
+
+    /**
+     * Convierte un valor de filtro a componentes de fecha.
+     *
+     * @param string $value Valor introducido.
+     * @return array|null
+     */
+    private function parse_filter_date_value( $value ) {
+        $value = trim( (string) $value );
+
+        if ( '' === $value ) {
+            return null;
+        }
+
+        $normalized = str_replace( array( '.', '-', ' ' ), '/', $value );
+
+        if ( preg_match( '/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/', $normalized, $matches ) ) {
+            return array(
+                'day'        => (int) $matches[3],
+                'month'      => (int) $matches[2],
+                'year'       => (int) $matches[1],
+                'year_digits'=> 4,
+            );
+        }
+
+        if ( preg_match( '/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/', $normalized, $matches ) ) {
+            $year_digits = isset( $matches[3] ) ? strlen( $matches[3] ) : 0;
+
+            return array(
+                'day'        => (int) $matches[1],
+                'month'      => (int) $matches[2],
+                'year'       => $year_digits ? (int) $matches[3] : null,
+                'year_digits'=> $year_digits,
+            );
+        }
+
+        $timestamp = $this->get_datetime_timestamp( $value );
+
+        if ( null === $timestamp ) {
+            return null;
+        }
+
+        return array(
+            'day'        => (int) wp_date( 'j', $timestamp ),
+            'month'      => (int) wp_date( 'n', $timestamp ),
+            'year'       => (int) wp_date( 'Y', $timestamp ),
+            'year_digits'=> 4,
+        );
+    }
+
+    /**
+     * Comprueba si un candidato coincide con un filtro de fecha.
+     *
+     * @param array  $filter    Componentes del filtro.
+     * @param string $candidate Valor a comprobar.
+     * @return bool
+     */
+    private function date_filter_matches_candidate( array $filter, $candidate ) {
+        if ( preg_match( '/^\d{1,2}:\d{2}(?::\d{2})?$/', trim( (string) $candidate ) ) ) {
+            return false;
+        }
+
+        $timestamp = $this->get_datetime_timestamp( $candidate );
+
+        if ( null !== $timestamp ) {
+            $candidate_day   = (int) wp_date( 'j', $timestamp );
+            $candidate_month = (int) wp_date( 'n', $timestamp );
+            $candidate_year  = (int) wp_date( 'Y', $timestamp );
+        } else {
+            $candidate_parts = $this->parse_filter_date_value( $candidate );
+
+            if ( ! $candidate_parts ) {
+                return false;
+            }
+
+            $candidate_day   = (int) $candidate_parts['day'];
+            $candidate_month = (int) $candidate_parts['month'];
+            $candidate_year  = isset( $candidate_parts['year'] ) ? (int) $candidate_parts['year'] : 0;
+        }
+
+        if ( $candidate_day !== (int) $filter['day'] || $candidate_month !== (int) $filter['month'] ) {
+            return false;
+        }
+
+        if ( empty( $filter['year_digits'] ) || empty( $filter['year'] ) ) {
+            return true;
+        }
+
+        if ( 2 === (int) $filter['year_digits'] ) {
+            return ( $candidate_year % 100 ) === ( (int) $filter['year'] % 100 );
+        }
+
+        return $candidate_year === (int) $filter['year'];
     }
 
     /**
