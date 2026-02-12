@@ -7078,9 +7078,38 @@ private function ensure_drive_permission( $folder_id, $token ) {
             return '';
         }
 
+        $normalized_meta_key = $this->normalize_meta_key( $meta_key );
+
         foreach ( $order->get_items() as $item ) {
             if ( ! $item instanceof WC_Order_Item_Product ) {
                 continue;
+            }
+
+            foreach ( $item->get_meta_data() as $item_meta ) {
+                $meta_data = $item_meta->get_data();
+                $item_key  = $this->normalize_meta_key( tradutema_array_get( $meta_data, 'key' ) );
+
+                if ( $item_key !== $normalized_meta_key ) {
+                    continue;
+                }
+
+                $item_value = tradutema_array_get( $meta_data, 'value' );
+
+                if ( is_scalar( $item_value ) ) {
+                    $item_value = trim( (string) $item_value );
+
+                    if ( '' !== $item_value ) {
+                        return wp_strip_all_tags( $item_value );
+                    }
+                }
+
+                if ( is_array( $item_value ) ) {
+                    $item_value = array_filter( array_map( 'strval', $item_value ) );
+
+                    if ( ! empty( $item_value ) ) {
+                        return wp_strip_all_tags( implode( ', ', $item_value ) );
+                    }
+                }
             }
 
             $product = $item->get_product();
