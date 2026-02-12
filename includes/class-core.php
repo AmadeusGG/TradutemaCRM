@@ -2394,7 +2394,7 @@ JS;
         if ( $order_object ) {
             $order_shipping_type = $this->resolve_order_shipping_type( $order_object, $order_meta );
             $order_customer_note = trim( wp_strip_all_tags( (string) $order_object->get_customer_note() ) );
-            $order_quote_reference = $this->resolve_order_quote_reference( $order_object, $order_meta );
+            $order_quote_reference = trim( $this->find_order_item_product_meta_value( $order_object, 'Referencia Cotización' ) );
         }
 
         $proveedores_indexed = $all_proveedores_indexed;
@@ -5309,7 +5309,7 @@ JS;
 
         $pages_value = wp_strip_all_tags( (string) $pages_value );
 
-        $quote_reference = $this->resolve_order_quote_reference( $order, $meta );
+        $quote_reference = $this->find_order_item_meta_value( $order, array( 'Referencia Cotización', 'Referencia Cotizacion' ) );
 
         $real_delivery_value = trim( (string) tradutema_array_get( $meta, 'fecha_real_entrega_pdf', '' ) );
         $real_delivery_label = '' !== $real_delivery_value
@@ -7078,6 +7078,8 @@ private function ensure_drive_permission( $folder_id, $token ) {
             return wp_strip_all_tags( $reference );
         }
 
+        $normalized_meta_key = $this->normalize_meta_key( $meta_key );
+
         foreach ( $order->get_items() as $item ) {
             foreach ( $item->get_meta_data() as $item_meta ) {
                 $meta_data = $item_meta->get_data();
@@ -7087,7 +7089,34 @@ private function ensure_drive_permission( $folder_id, $token ) {
                     continue;
                 }
 
+            foreach ( $item->get_meta_data() as $item_meta ) {
+                $meta_data = $item_meta->get_data();
+                $item_key  = $this->normalize_meta_key( tradutema_array_get( $meta_data, 'key' ) );
+
+                if ( $item_key !== $normalized_meta_key ) {
+                    continue;
+                }
+
                 $item_value = tradutema_array_get( $meta_data, 'value' );
+
+                if ( is_scalar( $item_value ) ) {
+                    $item_value = trim( (string) $item_value );
+
+                    if ( '' !== $item_value ) {
+                        return wp_strip_all_tags( $item_value );
+                    }
+                }
+
+                if ( is_array( $item_value ) ) {
+                    $item_value = array_filter( array_map( 'strval', $item_value ) );
+
+                    if ( ! empty( $item_value ) ) {
+                        return wp_strip_all_tags( implode( ', ', $item_value ) );
+                    }
+                }
+            }
+
+            $product = $item->get_product();
 
                 if ( is_scalar( $item_value ) ) {
                     $item_value = trim( (string) $item_value );
