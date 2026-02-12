@@ -2049,6 +2049,7 @@ JS;
         $order_has_shipping_details = false;
         $assigned_provider_details = null;
         $order_customer_note = '';
+        $order_line_items_count = 0;
 
         $estado_operacion          = tradutema_crm_operational_statuses();
         $proveedores               = $this->get_proveedores();
@@ -2095,6 +2096,7 @@ JS;
             $gdrive_url = ! empty( $selected_order['gdrive_url'] ) ? $selected_order['gdrive_url'] : '';
             $order_meta = isset( $selected_order['meta'] ) && is_array( $selected_order['meta'] ) ? $selected_order['meta'] : array();
             $order_logs = $this->get_order_logs( $order_object->get_id() );
+            $order_line_items_count = count( $order_object->get_items( 'line_item' ) );
 
             $countries_instance = class_exists( WC_Countries::class ) ? new WC_Countries() : null;
 
@@ -2499,6 +2501,11 @@ JS;
                 <?php else : ?>
                     <div class="card tradutema-crm-card">
                         <div class="card-body">
+                            <?php if ( $order_line_items_count > 1 ) : ?>
+                                <div class="alert alert-warning" role="alert">
+                                    <?php esc_html_e( 'Este pedido tiene más de un producto. Gestionar a mano.', 'tradutema-crm' ); ?>
+                                </div>
+                            <?php endif; ?>
                             <div class="tradutema-crm-section tradutema-crm-section-woo">
                                 <h2 class="h5 mb-3 tradutema-crm-section-title"><?php esc_html_e( 'Información de WooCommerce', 'tradutema-crm' ); ?></h2>
                                 <div class="row g-3 g-xl-4 mb-3">
