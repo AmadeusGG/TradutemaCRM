@@ -3095,6 +3095,7 @@ JS;
             '{{order_id}}',
             '{{customer_name}}',
             '{{customer_email}}',
+            '{{referencia_cotizacion}}',
             '{{order_total}}',
             '{{comentarios_cliente}}',
             '{{estado_operacional}}',
@@ -5302,6 +5303,8 @@ JS;
 
         $pages_value = wp_strip_all_tags( (string) $pages_value );
 
+        $quote_reference = $this->find_order_item_product_meta_value( $order, 'Referencia Cotización' );
+
         $real_delivery_value = trim( (string) tradutema_array_get( $meta, 'fecha_real_entrega_pdf', '' ) );
         $real_delivery_label = '' !== $real_delivery_value
             ? $this->format_display_date( $real_delivery_value, true )
@@ -5321,6 +5324,7 @@ JS;
             '{{order_id}}'                   => (string) $order->get_order_number(),
             '{{customer_name}}'              => $customer_name,
             '{{customer_email}}'             => $order_email ? $order_email : '',
+            '{{referencia_cotizacion}}'      => $quote_reference,
             '{{order_total}}'                => wp_strip_all_tags( $order->get_formatted_order_total() ),
             '{{comentarios_cliente}}'        => $customer_comments,
             '{{estado_operacional}}'         => $status_label,
@@ -7048,6 +7052,41 @@ private function ensure_drive_permission( $folder_id, $token ) {
                         }
                     }
                 }
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Busca un metadato del producto asociado a los items del pedido.
+     *
+     * @param WC_Order $order    Pedido de WooCommerce.
+     * @param string   $meta_key Clave de metadato a consultar.
+     * @return string
+     */
+    private function find_order_item_product_meta_value( WC_Order $order, $meta_key ) {
+        $meta_key = trim( (string) $meta_key );
+
+        if ( '' === $meta_key ) {
+            return '';
+        }
+
+        foreach ( $order->get_items() as $item ) {
+            if ( ! $item instanceof WC_Order_Item_Product ) {
+                continue;
+            }
+
+            $product = $item->get_product();
+
+            if ( ! $product instanceof WC_Product ) {
+                continue;
+            }
+
+            $value = trim( (string) $product->get_meta( $meta_key, true ) );
+
+            if ( '' !== $value ) {
+                return wp_strip_all_tags( $value );
             }
         }
 
