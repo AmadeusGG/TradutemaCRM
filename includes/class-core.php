@@ -2394,7 +2394,7 @@ JS;
         if ( $order_object ) {
             $order_shipping_type = $this->resolve_order_shipping_type( $order_object, $order_meta );
             $order_customer_note = trim( wp_strip_all_tags( (string) $order_object->get_customer_note() ) );
-            $order_quote_reference = trim( $this->find_order_item_meta_value( $order_object, array( 'Referencia Cotización', 'Referencia Cotizacion' ) ) );
+            $order_quote_reference = trim( $this->find_order_item_product_meta_value( $order_object, 'Referencia Cotización' ) );
         }
 
         $proveedores_indexed = $all_proveedores_indexed;
@@ -7058,6 +7058,70 @@ private function ensure_drive_permission( $folder_id, $token ) {
                         }
                     }
                 }
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Busca un metadato del producto asociado a los items del pedido.
+     *
+     * @param WC_Order $order    Pedido de WooCommerce.
+     * @param string   $meta_key Clave de metadato a consultar.
+     * @return string
+     */
+    private function find_order_item_product_meta_value( WC_Order $order, $meta_key ) {
+        $meta_key = trim( (string) $meta_key );
+
+        if ( '' === $meta_key ) {
+            return '';
+        }
+
+        $normalized_meta_key = $this->normalize_meta_key( $meta_key );
+
+        foreach ( $order->get_items() as $item ) {
+            if ( ! $item instanceof WC_Order_Item_Product ) {
+                continue;
+            }
+
+            foreach ( $item->get_meta_data() as $item_meta ) {
+                $meta_data = $item_meta->get_data();
+                $item_key  = $this->normalize_meta_key( tradutema_array_get( $meta_data, 'key' ) );
+
+                if ( $item_key !== $normalized_meta_key ) {
+                    continue;
+                }
+
+                $item_value = tradutema_array_get( $meta_data, 'value' );
+
+                if ( is_scalar( $item_value ) ) {
+                    $item_value = trim( (string) $item_value );
+
+                    if ( '' !== $item_value ) {
+                        return wp_strip_all_tags( $item_value );
+                    }
+                }
+
+                if ( is_array( $item_value ) ) {
+                    $item_value = array_filter( array_map( 'strval', $item_value ) );
+
+                    if ( ! empty( $item_value ) ) {
+                        return wp_strip_all_tags( implode( ', ', $item_value ) );
+                    }
+                }
+            }
+
+            $product = $item->get_product();
+
+            if ( ! $product instanceof WC_Product ) {
+                continue;
+            }
+
+            $value = trim( (string) $product->get_meta( $meta_key, true ) );
+
+            if ( '' !== $value ) {
+                return wp_strip_all_tags( $value );
             }
         }
 
