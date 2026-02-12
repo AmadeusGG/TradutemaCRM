@@ -2049,6 +2049,7 @@ JS;
         $order_has_shipping_details = false;
         $assigned_provider_details = null;
         $order_customer_note = '';
+        $order_quote_reference = '';
         $order_line_items_count = 0;
 
         $estado_operacion          = tradutema_crm_operational_statuses();
@@ -2393,6 +2394,7 @@ JS;
         if ( $order_object ) {
             $order_shipping_type = $this->resolve_order_shipping_type( $order_object, $order_meta );
             $order_customer_note = trim( wp_strip_all_tags( (string) $order_object->get_customer_note() ) );
+            $order_quote_reference = trim( $this->find_order_item_product_meta_value( $order_object, 'Referencia Cotización' ) );
         }
 
         $proveedores_indexed = $all_proveedores_indexed;
@@ -2554,6 +2556,10 @@ JS;
                                                 <span class="text-muted">&mdash;</span>
                                             <?php endif; ?>
                                         </p>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <p class="text-muted mb-1"><?php esc_html_e( 'Referencia Cotización', 'tradutema-crm' ); ?></p>
+                                        <p class="mb-0"><?php echo '' !== $order_quote_reference ? esc_html( $order_quote_reference ) : '<span class="text-muted">&mdash;</span>'; ?></p>
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
@@ -7072,9 +7078,38 @@ private function ensure_drive_permission( $folder_id, $token ) {
             return '';
         }
 
+        $normalized_meta_key = $this->normalize_meta_key( $meta_key );
+
         foreach ( $order->get_items() as $item ) {
             if ( ! $item instanceof WC_Order_Item_Product ) {
                 continue;
+            }
+
+            foreach ( $item->get_meta_data() as $item_meta ) {
+                $meta_data = $item_meta->get_data();
+                $item_key  = $this->normalize_meta_key( tradutema_array_get( $meta_data, 'key' ) );
+
+                if ( $item_key !== $normalized_meta_key ) {
+                    continue;
+                }
+
+                $item_value = tradutema_array_get( $meta_data, 'value' );
+
+                if ( is_scalar( $item_value ) ) {
+                    $item_value = trim( (string) $item_value );
+
+                    if ( '' !== $item_value ) {
+                        return wp_strip_all_tags( $item_value );
+                    }
+                }
+
+                if ( is_array( $item_value ) ) {
+                    $item_value = array_filter( array_map( 'strval', $item_value ) );
+
+                    if ( ! empty( $item_value ) ) {
+                        return wp_strip_all_tags( implode( ', ', $item_value ) );
+                    }
+                }
             }
 
             $product = $item->get_product();
