@@ -7065,25 +7065,29 @@ private function ensure_drive_permission( $folder_id, $token ) {
     }
 
     /**
-     * Busca un metadato del producto asociado a los items del pedido.
+     * Obtiene la referencia de cotización del pedido a partir de metadatos del item.
      *
-     * @param WC_Order $order    Pedido de WooCommerce.
-     * @param string   $meta_key Clave de metadato a consultar.
+     * @param WC_Order $order Pedido de WooCommerce.
+     * @param array    $meta  Metadatos internos del CRM.
      * @return string
      */
-    private function find_order_item_product_meta_value( WC_Order $order, $meta_key ) {
-        $meta_key = trim( (string) $meta_key );
+    private function resolve_order_quote_reference( WC_Order $order, array $meta = array() ) {
+        $reference = trim( $this->find_order_item_meta_value( $order, array( 'Referencia Cotización', 'Referencia Cotizacion' ) ) );
 
-        if ( '' === $meta_key ) {
-            return '';
+        if ( '' !== $reference ) {
+            return wp_strip_all_tags( $reference );
         }
 
         $normalized_meta_key = $this->normalize_meta_key( $meta_key );
 
         foreach ( $order->get_items() as $item ) {
-            if ( ! $item instanceof WC_Order_Item_Product ) {
-                continue;
-            }
+            foreach ( $item->get_meta_data() as $item_meta ) {
+                $meta_data = $item_meta->get_data();
+                $item_key  = $this->normalize_meta_key( tradutema_array_get( $meta_data, 'key' ) );
+
+                if ( false === strpos( $item_key, 'referencia' ) || false === strpos( $item_key, 'cotizacion' ) ) {
+                    continue;
+                }
 
             foreach ( $item->get_meta_data() as $item_meta ) {
                 $meta_data = $item_meta->get_data();
@@ -7114,18 +7118,25 @@ private function ensure_drive_permission( $folder_id, $token ) {
 
             $product = $item->get_product();
 
-            if ( ! $product instanceof WC_Product ) {
-                continue;
-            }
+                if ( is_scalar( $item_value ) ) {
+                    $item_value = trim( (string) $item_value );
 
-            $value = trim( (string) $product->get_meta( $meta_key, true ) );
+                    if ( '' !== $item_value ) {
+                        return wp_strip_all_tags( $item_value );
+                    }
+                }
 
-            if ( '' !== $value ) {
-                return wp_strip_all_tags( $value );
+                if ( is_array( $item_value ) ) {
+                    $item_value = array_filter( array_map( 'strval', $item_value ) );
+
+                    if ( ! empty( $item_value ) ) {
+                        return wp_strip_all_tags( implode( ', ', $item_value ) );
+                    }
+                }
             }
         }
 
-        return '';
+        return trim( (string) tradutema_array_get( $meta, 'referencia', '' ) );
     }
 
     /**
