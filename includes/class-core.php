@@ -5309,7 +5309,7 @@ JS;
 
         $pages_value = wp_strip_all_tags( (string) $pages_value );
 
-        $quote_reference = $this->find_order_item_product_meta_value( $order, 'Referencia Cotización' );
+        $quote_reference = $this->find_order_item_meta_value( $order, array( 'Referencia Cotización', 'Referencia Cotizacion' ) );
 
         $real_delivery_value = trim( (string) tradutema_array_get( $meta, 'fecha_real_entrega_pdf', '' ) );
         $real_delivery_label = '' !== $real_delivery_value
