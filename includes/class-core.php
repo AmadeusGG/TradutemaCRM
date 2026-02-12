@@ -2049,6 +2049,7 @@ JS;
         $order_has_shipping_details = false;
         $assigned_provider_details = null;
         $order_customer_note = '';
+        $order_quote_reference = '';
         $order_line_items_count = 0;
 
         $estado_operacion          = tradutema_crm_operational_statuses();
@@ -2393,6 +2394,7 @@ JS;
         if ( $order_object ) {
             $order_shipping_type = $this->resolve_order_shipping_type( $order_object, $order_meta );
             $order_customer_note = trim( wp_strip_all_tags( (string) $order_object->get_customer_note() ) );
+            $order_quote_reference = trim( $this->find_order_item_meta_value( $order_object, array( 'Referencia Cotización', 'Referencia Cotizacion' ) ) );
         }
 
         $proveedores_indexed = $all_proveedores_indexed;
@@ -2554,6 +2556,10 @@ JS;
                                                 <span class="text-muted">&mdash;</span>
                                             <?php endif; ?>
                                         </p>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <p class="text-muted mb-1"><?php esc_html_e( 'Referencia Cotización', 'tradutema-crm' ); ?></p>
+                                        <p class="mb-0"><?php echo '' !== $order_quote_reference ? esc_html( $order_quote_reference ) : '<span class="text-muted">&mdash;</span>'; ?></p>
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
@@ -5303,7 +5309,7 @@ JS;
 
         $pages_value = wp_strip_all_tags( (string) $pages_value );
 
-        $quote_reference = $this->find_order_item_product_meta_value( $order, 'Referencia Cotización' );
+        $quote_reference = $this->find_order_item_meta_value( $order, array( 'Referencia Cotización', 'Referencia Cotizacion' ) );
 
         $real_delivery_value = trim( (string) tradutema_array_get( $meta, 'fecha_real_entrega_pdf', '' ) );
         $real_delivery_label = '' !== $real_delivery_value
@@ -7052,41 +7058,6 @@ private function ensure_drive_permission( $folder_id, $token ) {
                         }
                     }
                 }
-            }
-        }
-
-        return '';
-    }
-
-    /**
-     * Busca un metadato del producto asociado a los items del pedido.
-     *
-     * @param WC_Order $order    Pedido de WooCommerce.
-     * @param string   $meta_key Clave de metadato a consultar.
-     * @return string
-     */
-    private function find_order_item_product_meta_value( WC_Order $order, $meta_key ) {
-        $meta_key = trim( (string) $meta_key );
-
-        if ( '' === $meta_key ) {
-            return '';
-        }
-
-        foreach ( $order->get_items() as $item ) {
-            if ( ! $item instanceof WC_Order_Item_Product ) {
-                continue;
-            }
-
-            $product = $item->get_product();
-
-            if ( ! $product instanceof WC_Product ) {
-                continue;
-            }
-
-            $value = trim( (string) $product->get_meta( $meta_key, true ) );
-
-            if ( '' !== $value ) {
-                return wp_strip_all_tags( $value );
             }
         }
 
