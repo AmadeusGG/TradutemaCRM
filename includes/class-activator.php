@@ -71,6 +71,8 @@ class Activator {
             fecha_prevista_entrega DATE NULL,
             hora_prevista_entrega TIME NULL,
             fecha_real_entrega_pdf DATETIME NULL,
+            nacex_albaran VARCHAR(190) NULL,
+            exceso_palabras VARCHAR(190) NULL,
             idioma_origen VARCHAR(50) NULL,
             idioma_destino VARCHAR(50) NULL,
             num_paginas INT NULL,
