@@ -1401,6 +1401,8 @@ CSS;
             'estado_operacional',
             'proveedor_id',
             'fecha_real_entrega_pdf',
+            'nacex_albaran',
+            'exceso_palabras',
             'referencia',
             'comentario_interno',
             'comentario_linguistico',
@@ -2347,6 +2349,8 @@ JS;
                 'fecha_prevista_entrega' => '',
                 'hora_prevista_entrega'  => '',
                 'fecha_real_entrega_pdf' => '',
+                'nacex_albaran'          => '',
+                'exceso_palabras'        => '',
                 'envio_papel'            => 0,
                 'comentario_interno'     => '',
                 'comentario_linguistico' => '',
@@ -2637,6 +2641,14 @@ JS;
                                                     <input type="text" name="referencia" id="order_referencia" value="<?php echo esc_attr( $order_meta['referencia'] ); ?>" class="form-control" />
                                                 </div>
                                                 <div>
+                                                    <label for="order_nacex_albaran" class="form-label"><?php esc_html_e( 'Albarán de Nacex', 'tradutema-crm' ); ?></label>
+                                                    <input type="text" name="nacex_albaran" id="order_nacex_albaran" value="<?php echo esc_attr( $order_meta['nacex_albaran'] ); ?>" class="form-control" />
+                                                </div>
+                                                <div>
+                                                    <label for="order_exceso_palabras" class="form-label"><?php esc_html_e( 'Exceso Palabras', 'tradutema-crm' ); ?></label>
+                                                    <input type="text" name="exceso_palabras" id="order_exceso_palabras" value="<?php echo esc_attr( $order_meta['exceso_palabras'] ); ?>" class="form-control" />
+                                                </div>
+                                                <div>
                                                     <h2 class="h6 text-uppercase text-muted mb-2 tradutema-crm-provider-subtitle"><?php esc_html_e( 'Planificación y entrega', 'tradutema-crm' ); ?></h2>
                                                     <label for="order_fecha_real_pdf_date" class="form-label"><?php esc_html_e( 'Fecha y ahora Entrega real Proveedor', 'tradutema-crm' ); ?></label>
                                                     <div class="row g-2">
@@ -2759,6 +2771,8 @@ JS;
                                                 <input type="hidden" name="estado_operacional" value="" />
                                                 <input type="hidden" name="proveedor_id" value="" />
                                                 <input type="hidden" name="fecha_real_entrega_pdf" value="" />
+                                                <input type="hidden" name="nacex_albaran" value="" />
+                                                <input type="hidden" name="exceso_palabras" value="" />
                                                 <input type="hidden" name="referencia" value="" />
                                                 <input type="hidden" name="comentario_interno" value="" />
                                                 <input type="hidden" name="comentario_linguistico" value="" />
@@ -3126,6 +3140,8 @@ JS;
             '{{gdrive_link_To_Client}}',
             '{{Upload_To_Client}}',
             '{{fecha_real_entrega_proveedor}}',
+            '{{nacex_albaran}}',
+            '{{exceso_palabras}}',
             '{{direccion_entrega_papel}}',
         );
         $operational_statuses = tradutema_crm_operational_statuses();
@@ -3818,6 +3834,7 @@ JS;
         global $wpdb;
 
         $table = $wpdb->prefix . 'ttm_order_meta';
+        $this->ensure_order_meta_extended_fields();
         $meta      = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE order_id = %d", $order_id ), ARRAY_A );
         $defaults  = array(
             'estado_operacional'     => 'recibido',
@@ -3828,6 +3845,8 @@ JS;
             'fecha_prevista_entrega' => '',
             'hora_prevista_entrega'  => '',
             'fecha_real_entrega_pdf' => '',
+            'nacex_albaran'          => '',
+            'exceso_palabras'        => '',
             'proveedor_id'           => null,
             'origen_pedido'          => '',
             'idioma_origen'          => '',
@@ -3857,11 +3876,14 @@ JS;
         global $wpdb;
 
         $table  = $wpdb->prefix . 'ttm_order_meta';
+        $this->ensure_order_meta_extended_fields();
         $fields = array(
             'proveedor_id'          => isset( $data['proveedor_id'] ) ? absint( $data['proveedor_id'] ) ?: null : null,
             'comentario_interno'    => wp_kses_post( tradutema_array_get( $data, 'comentario_interno' ) ),
             'comentario_linguistico' => wp_kses_post( tradutema_array_get( $data, 'comentario_linguistico' ) ),
             'referencia'            => sanitize_text_field( tradutema_array_get( $data, 'referencia' ) ),
+            'nacex_albaran'         => sanitize_text_field( tradutema_array_get( $data, 'nacex_albaran' ) ),
+            'exceso_palabras'       => sanitize_text_field( tradutema_array_get( $data, 'exceso_palabras' ) ),
             'envio_papel'           => ! empty( $data['envio_papel'] ) ? 1 : 0,
             'estado_operacional'    => $this->normalize_operational_status_value( tradutema_array_get( $data, 'estado_operacional', 'recibido' ) ),
             'fecha_prevista_entrega'=> $this->null_if_empty( tradutema_array_get( $data, 'fecha_prevista_entrega' ) ),
@@ -4183,6 +4205,8 @@ JS;
             'estado_operacional'    => __( 'Estado operacional', 'tradutema-crm' ),
             'proveedor_id'          => __( 'Proveedor', 'tradutema-crm' ),
             'referencia'            => __( 'Referencia interna', 'tradutema-crm' ),
+            'nacex_albaran'         => __( 'Albarán de Nacex', 'tradutema-crm' ),
+            'exceso_palabras'       => __( 'Exceso Palabras', 'tradutema-crm' ),
             'comentario_interno'    => __( 'Comentario interno', 'tradutema-crm' ),
             'comentario_linguistico' => __( 'Comentario lingüístico', 'tradutema-crm' ),
             'envio_papel'           => __( 'Envío en papel', 'tradutema-crm' ),
@@ -4783,6 +4807,8 @@ JS;
             'comentario_interno'      => wp_kses_post( wp_unslash( tradutema_array_get( $_POST, 'comentario_interno' ) ) ),
             'comentario_linguistico'  => wp_kses_post( wp_unslash( tradutema_array_get( $_POST, 'comentario_linguistico' ) ) ),
             'referencia'              => sanitize_text_field( wp_unslash( tradutema_array_get( $_POST, 'referencia' ) ) ),
+            'nacex_albaran'           => sanitize_text_field( wp_unslash( tradutema_array_get( $_POST, 'nacex_albaran' ) ) ),
+            'exceso_palabras'         => sanitize_text_field( wp_unslash( tradutema_array_get( $_POST, 'exceso_palabras' ) ) ),
             'envio_papel'             => isset( $_POST['envio_papel'] ) && '1' === (string) wp_unslash( $_POST['envio_papel'] ) ? 1 : 0,
             'estado_operacional'      => sanitize_text_field( wp_unslash( tradutema_array_get( $_POST, 'estado_operacional', 'recibido' ) ) ),
             'fecha_prevista_entrega'  => sanitize_text_field( wp_unslash( tradutema_array_get( $_POST, 'fecha_prevista_entrega' ) ) ),
@@ -5204,6 +5230,27 @@ JS;
     }
 
     /**
+     * Asegura que las columnas ampliadas del pedido existan en la base de datos.
+     */
+    private function ensure_order_meta_extended_fields() {
+        global $wpdb;
+
+        $table   = $wpdb->prefix . 'ttm_order_meta';
+        $columns = array(
+            'nacex_albaran'   => 'VARCHAR(190) NULL',
+            'exceso_palabras' => 'VARCHAR(190) NULL',
+        );
+
+        foreach ( $columns as $column => $definition ) {
+            $exists = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", $column ) );
+
+            if ( ! $exists ) {
+                $wpdb->query( "ALTER TABLE {$table} ADD {$column} {$definition}" );
+            }
+        }
+    }
+
+    /**
      * Asegura que la columna de destinatarios existe en las plantillas de email.
      */
     private function ensure_email_template_recipients_field() {
@@ -5389,6 +5436,8 @@ JS;
             '{{gdrive_link_To_Client}}'      => isset( $drive_links['to_client'] ) ? $drive_links['to_client'] : '',
             '{{Upload_To_Client}}'           => $upload_link,
             '{{fecha_real_entrega_proveedor}}' => $real_delivery_label,
+            '{{nacex_albaran}}'              => wp_strip_all_tags( (string) tradutema_array_get( $meta, 'nacex_albaran', '' ) ),
+            '{{exceso_palabras}}'            => wp_strip_all_tags( (string) tradutema_array_get( $meta, 'exceso_palabras', '' ) ),
             '{{direccion_entrega_papel}}'    => $paper_shipping_address,
         );
 
