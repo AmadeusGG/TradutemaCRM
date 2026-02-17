@@ -2259,14 +2259,7 @@ JS;
                 );
             }
 
-            $shipping_phone = method_exists( $order_object, 'get_shipping_phone' ) ? $order_object->get_shipping_phone() : '';
-
-            if ( $shipping_phone ) {
-                $order_shipping_details[] = array(
-                    'label' => __( 'Teléfono', 'tradutema-crm' ),
-                    'value' => $shipping_phone,
-                );
-            }
+            $shipping_phone = $this->get_order_shipping_phone( $order_object, $shipping_data );
 
             $shipping_address_lines = array_filter(
                 array(
@@ -2331,6 +2324,13 @@ JS;
                 $order_shipping_details[] = array(
                     'label' => __( 'País', 'tradutema-crm' ),
                     'value' => $shipping_country_label,
+                );
+            }
+
+            if ( '' !== $shipping_phone ) {
+                $order_shipping_details[] = array(
+                    'label' => __( 'Número de teléfono', 'tradutema-crm' ),
+                    'value' => $shipping_phone,
                 );
             }
 
@@ -5298,6 +5298,16 @@ JS;
             $provider_pickup_address = wp_strip_all_tags( (string) tradutema_array_get( $provider, 'direccion_recogida', '' ) );
         }
 
+        $order_shipping_phone = $this->get_order_shipping_phone( $order, $order->get_address( 'shipping' ) );
+
+        if ( '' !== $order_shipping_phone ) {
+            $provider_pickup_address = trim( $provider_pickup_address );
+            $phone_line = sprintf( __( 'Número de teléfono: %s', 'tradutema-crm' ), $order_shipping_phone );
+            $provider_pickup_address = '' !== $provider_pickup_address
+                ? $provider_pickup_address . "\n" . $phone_line
+                : $phone_line;
+        }
+
         $pages_value = trim( (string) tradutema_array_get( $meta, 'num_paginas', '' ) );
 
         if ( '' === $pages_value ) {
@@ -7018,6 +7028,39 @@ private function ensure_drive_permission( $folder_id, $token ) {
         }
 
         return implode( ', ', $parts );
+    }
+
+    /**
+     * Recupera el teléfono de envío del pedido soportando distintas fuentes.
+     *
+     * @param WC_Order $order         Pedido de WooCommerce.
+     * @param array    $shipping_data Datos de envío ya cargados, si existen.
+     * @return string
+     */
+    private function get_order_shipping_phone( WC_Order $order, array $shipping_data = array() ) {
+        $candidates = array();
+
+        if ( method_exists( $order, 'get_shipping_phone' ) ) {
+            $candidates[] = $order->get_shipping_phone();
+        }
+
+        $candidates[] = tradutema_array_get( $shipping_data, 'phone', '' );
+        $candidates[] = $order->get_meta( '_shipping_phone', true );
+        $candidates[] = $order->get_meta( 'shipping_phone', true );
+        $candidates[] = $this->find_order_item_meta_value(
+            $order,
+            array( 'Número de teléfono', 'Numero de telefono', 'Teléfono', 'Telefono' )
+        );
+
+        foreach ( $candidates as $candidate ) {
+            $value = trim( sanitize_text_field( (string) $candidate ) );
+
+            if ( '' !== $value ) {
+                return $value;
+            }
+        }
+
+        return '';
     }
 
     /**
