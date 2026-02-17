@@ -2877,6 +2877,10 @@ JS;
                     $current_recipients = $legacy_recipients;
                 }
             }
+
+            if ( '' !== $current_recipients ) {
+                $current_recipients = $this->format_email_template_recipients_for_input( $current_recipients );
+            }
         }
 
         if ( '' === $current_recipients ) {
@@ -3146,7 +3150,7 @@ JS;
             }
 
             if ( '' !== $stored_recipients ) {
-                $current_recipients = $stored_recipients;
+                $current_recipients = $this->format_email_template_recipients_for_input( $stored_recipients );
             }
         }
         $current_page  = tradutema_crm_current_admin_page();
@@ -4489,7 +4493,31 @@ JS;
 
         $normalized = array_values( array_unique( $normalized ) );
 
-        return implode( "\n", $normalized );
+        return implode( ', ', $normalized );
+    }
+
+    /**
+     * Formatea los destinatarios de una plantilla para mostrarlos en un input de una sola línea.
+     *
+     * @param string $raw_recipients Destinatarios almacenados en base de datos.
+     * @return string Destinatarios separados por comas.
+     */
+    private function format_email_template_recipients_for_input( $raw_recipients ) {
+        $raw_recipients = (string) $raw_recipients;
+
+        if ( '' === trim( $raw_recipients ) ) {
+            return '';
+        }
+
+        $raw_recipients = str_replace( array( "\r\n", "\r", ';' ), "\n", $raw_recipients );
+        $parts          = preg_split( '/[\n,]+/', $raw_recipients );
+        $parts          = array_filter( array_map( 'trim', (array) $parts ), 'strlen' );
+
+        if ( empty( $parts ) ) {
+            return '';
+        }
+
+        return implode( ', ', $parts );
     }
 
     /**
