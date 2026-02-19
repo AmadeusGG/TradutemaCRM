@@ -1576,6 +1576,7 @@ JS;
 
         $filter_fecha_solicitud = $filters['filter_fecha_solicitud'];
         $filter_fecha_real      = $filters['filter_fecha_real'];
+        $language_codes         = $this->get_system_language_codes();
 
         $current_user  = wp_get_current_user();
         $current_page  = tradutema_crm_current_admin_page();
@@ -1694,6 +1695,31 @@ JS;
                                 <div class="col-6">
                                     <label for="filter_fecha_real" class="form-label"><?php esc_html_e( 'F. real', 'tradutema-crm' ); ?></label>
                                     <input type="text" id="filter_fecha_real" name="filter_fecha_real" value="<?php echo esc_attr( $filter_fecha_real ); ?>" class="form-control" placeholder="dd/mm" aria-label="<?php echo esc_attr__( 'Filtrar por fecha real', 'tradutema-crm' ); ?>" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-2 col-xxl-2">
+                        <div class="tradutema-crm-filter-group tradutema-crm-filter-group--languages">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <label for="filter_idioma_origen" class="form-label"><?php esc_html_e( 'Idi. Ori', 'tradutema-crm' ); ?></label>
+                                    <select id="filter_idioma_origen" name="filter_idioma_origen" class="form-select" aria-label="<?php echo esc_attr__( 'Filtrar por idioma origen', 'tradutema-crm' ); ?>">
+                                        <option value=""><?php esc_html_e( 'Todos', 'tradutema-crm' ); ?></option>
+                                        <?php foreach ( $language_codes as $language_code ) : ?>
+                                            <option value="<?php echo esc_attr( $language_code ); ?>" <?php selected( $filters['filter_idioma_origen'], $language_code ); ?>><?php echo esc_html( $language_code ); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label for="filter_idioma_destino" class="form-label"><?php esc_html_e( 'Idi. Des', 'tradutema-crm' ); ?></label>
+                                    <select id="filter_idioma_destino" name="filter_idioma_destino" class="form-select" aria-label="<?php echo esc_attr__( 'Filtrar por idioma destino', 'tradutema-crm' ); ?>">
+                                        <option value=""><?php esc_html_e( 'Todos', 'tradutema-crm' ); ?></option>
+                                        <?php foreach ( $language_codes as $language_code ) : ?>
+                                            <option value="<?php echo esc_attr( $language_code ); ?>" <?php selected( $filters['filter_idioma_destino'], $language_code ); ?>><?php echo esc_html( $language_code ); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -3357,6 +3383,8 @@ JS;
             'per_page'           => '',
             'filter_fecha_solicitud' => '',
             'filter_fecha_real'      => '',
+            'filter_idioma_origen'   => '',
+            'filter_idioma_destino'  => '',
         );
 
         $input = wp_unslash( $_GET );
@@ -3598,12 +3626,14 @@ JS;
 
         $filter_fecha_solicitud = $filters['filter_fecha_solicitud'];
         $filter_fecha_real      = $filters['filter_fecha_real'];
+        $filter_idioma_origen   = strtoupper( trim( (string) $filters['filter_idioma_origen'] ) );
+        $filter_idioma_destino  = strtoupper( trim( (string) $filters['filter_idioma_destino'] ) );
 
-        if ( '' !== $filter_fecha_solicitud || '' !== $filter_fecha_real ) {
+        if ( '' !== $filter_fecha_solicitud || '' !== $filter_fecha_real || '' !== $filter_idioma_origen || '' !== $filter_idioma_destino ) {
             $orders = array_values(
                 array_filter(
                     $orders,
-                    function ( $order ) use ( $filter_fecha_solicitud, $filter_fecha_real ) {
+                    function ( $order ) use ( $filter_fecha_solicitud, $filter_fecha_real, $filter_idioma_origen, $filter_idioma_destino ) {
                         if ( '' !== $filter_fecha_solicitud ) {
                             $matches_solicitud = $this->order_matches_partial_date(
                                 $filter_fecha_solicitud,
@@ -3626,6 +3656,18 @@ JS;
                             if ( ! $matches_real ) {
                                 return false;
                             }
+                        }
+
+                        $order_language_origin = $this->get_iso_language_code( tradutema_array_get( $order, 'idioma_origen', '' ) );
+
+                        if ( '' !== $filter_idioma_origen && $order_language_origin !== $filter_idioma_origen ) {
+                            return false;
+                        }
+
+                        $order_language_destination = $this->get_iso_language_code( tradutema_array_get( $order, 'idioma_destino', '' ) );
+
+                        if ( '' !== $filter_idioma_destino && $order_language_destination !== $filter_idioma_destino ) {
+                            return false;
                         }
 
                         return true;
@@ -7546,7 +7588,22 @@ private function ensure_drive_permission( $folder_id, $token ) {
 
         $normalized = strtolower( remove_accents( $language ) );
 
-        $map = array(
+        $map = $this->get_iso_language_map();
+
+        if ( isset( $map[ $normalized ] ) ) {
+            return $map[ $normalized ];
+        }
+
+        return $language_upper;
+    }
+
+    /**
+     * Devuelve el mapa de idiomas del sistema a códigos ISO-639-1.
+     *
+     * @return array<string,string>
+     */
+    private function get_iso_language_map() {
+        return array(
             'aleman'      => 'DE',
             'arabe'       => 'AR',
             'bulgaro'     => 'BG',
@@ -7583,12 +7640,18 @@ private function ensure_drive_permission( $folder_id, $token ) {
             'turco'       => 'TR',
             'ucraniano'   => 'UK',
         );
+    }
 
-        if ( isset( $map[ $normalized ] ) ) {
-            return $map[ $normalized ];
-        }
+    /**
+     * Devuelve los códigos ISO de todos los idiomas del sistema.
+     *
+     * @return string[]
+     */
+    private function get_system_language_codes() {
+        $codes = array_values( array_unique( $this->get_iso_language_map() ) );
+        sort( $codes );
 
-        return $language_upper;
+        return $codes;
     }
 
     /**
