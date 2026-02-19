@@ -778,7 +778,7 @@ body.tradutema-crm-admin .tooltip-inner {
 }
 
 .tradutema-crm-provider-notes textarea {
-    min-height: 120px;
+    min-height: 96px;
 }
 
 .tradutema-crm-address-toggle {
@@ -2652,121 +2652,115 @@ JS;
                                 </div>
                                 <div class="col-12">
                                     <div class="row g-3 align-items-start">
-                                        <div class="col-12 col-xl-6">
-                                            <div class="d-flex flex-column gap-3 h-100">
-                                                <div>
-                                                    <label for="order_estado_operacional" class="form-label"><?php esc_html_e( 'Estado operacional', 'tradutema-crm' ); ?></label>
-                                                    <select name="estado_operacional" id="order_estado_operacional" class="form-select">
-                                                        <?php foreach ( $estado_operacion as $estado_key => $estado_label ) : ?>
-                                                            <option value="<?php echo esc_attr( $estado_key ); ?>" <?php selected( $order_meta['estado_operacional'], $estado_key ); ?>><?php echo esc_html( $estado_label ); ?></option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label for="order_referencia" class="form-label"><?php esc_html_e( 'Referencia interna', 'tradutema-crm' ); ?></label>
-                                                    <input type="text" name="referencia" id="order_referencia" value="<?php echo esc_attr( $order_meta['referencia'] ); ?>" class="form-control" />
-                                                </div>
-                                                <div>
-                                                    <label for="order_nacex_albaran" class="form-label"><?php esc_html_e( 'Albarán de Nacex', 'tradutema-crm' ); ?></label>
-                                                    <input type="text" name="nacex_albaran" id="order_nacex_albaran" value="<?php echo esc_attr( $order_meta['nacex_albaran'] ); ?>" class="form-control" />
-                                                </div>
-                                                <div>
-                                                    <label for="order_exceso_palabras" class="form-label"><?php esc_html_e( 'Exceso Palabras', 'tradutema-crm' ); ?></label>
-                                                    <input type="text" name="exceso_palabras" id="order_exceso_palabras" value="<?php echo esc_attr( $order_meta['exceso_palabras'] ); ?>" class="form-control" />
-                                                </div>
-                                                <div>
-                                                    <h2 class="h6 text-uppercase text-muted mb-2 tradutema-crm-provider-subtitle"><?php esc_html_e( 'Planificación y entrega', 'tradutema-crm' ); ?></h2>
-                                                    <label for="order_fecha_real_pdf_date" class="form-label"><?php esc_html_e( 'Fecha y ahora Entrega real Proveedor', 'tradutema-crm' ); ?></label>
-                                                    <div class="row g-2">
-                                                        <div class="col-7">
-                                                            <input type="date" id="order_fecha_real_pdf_date" value="<?php echo esc_attr( $real_delivery_date ); ?>" class="form-control" />
-                                                        </div>
-                                                        <div class="col-5">
-                                                            <select id="order_fecha_real_pdf_time" class="form-select">
-                                                                <option value=""><?php esc_html_e( 'Selecciona hora', 'tradutema-crm' ); ?></option>
-                                                                <?php foreach ( $real_delivery_time_options as $time_option ) : ?>
-                                                                    <option value="<?php echo esc_attr( $time_option ); ?>" <?php selected( $real_delivery_time, $time_option ); ?>><?php echo esc_html( $time_option ); ?> h</option>
-                                                                <?php endforeach; ?>
-                                                                <?php if ( $real_delivery_time && ! in_array( $real_delivery_time, $real_delivery_time_options, true ) ) : ?>
-                                                                    <option value="<?php echo esc_attr( $real_delivery_time ); ?>" selected><?php echo esc_html( $real_delivery_time ); ?> h</option>
-                                                                <?php endif; ?>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <input type="hidden" name="fecha_real_entrega_pdf" id="order_fecha_real_pdf" value="<?php echo esc_attr( $real_delivery_input_value ); ?>" />
-                                                    <script>
-                                                        document.addEventListener('DOMContentLoaded', function () {
-                                                            const realDeliveryDate = document.getElementById('order_fecha_real_pdf_date');
-                                                            const realDeliveryTime = document.getElementById('order_fecha_real_pdf_time');
-                                                            const realDeliveryField = document.getElementById('order_fecha_real_pdf');
-
-                                                            if (!realDeliveryDate || !realDeliveryTime || !realDeliveryField) {
-                                                                return;
-                                                            }
-
-                                                            const syncRealDeliveryValue = () => {
-                                                                const dateValue = realDeliveryDate.value;
-                                                                const timeValue = realDeliveryTime.value;
-
-                                                                realDeliveryField.value = dateValue && timeValue ? `${dateValue}T${timeValue}` : '';
-                                                            };
-
-                                                            realDeliveryDate.addEventListener('change', syncRealDeliveryValue);
-                                                            realDeliveryTime.addEventListener('change', syncRealDeliveryValue);
-
-                                                            syncRealDeliveryValue();
-                                                        });
-                                                    </script>
-                                                </div>
-                                                <div class="tradutema-crm-provider-notes">
-                                                    <h2 class="h6 text-uppercase text-muted mb-2 tradutema-crm-provider-subtitle"><?php esc_html_e( 'Comentario interno', 'tradutema-crm' ); ?></h2>
-                                                    <label for="order_comentario" class="form-label"><?php esc_html_e( 'Comentario interno', 'tradutema-crm' ); ?></label>
-                                                    <textarea name="comentario_interno" id="order_comentario" rows="3" class="form-control"><?php echo esc_textarea( $order_meta['comentario_interno'] ); ?></textarea>
-                                                </div>
-                                            </div>
+                                        <div class="col-12 col-md-6 col-xl-4">
+                                            <label for="order_estado_operacional" class="form-label"><?php esc_html_e( 'Estado operacional', 'tradutema-crm' ); ?></label>
+                                            <select name="estado_operacional" id="order_estado_operacional" class="form-select">
+                                                <?php foreach ( $estado_operacion as $estado_key => $estado_label ) : ?>
+                                                    <option value="<?php echo esc_attr( $estado_key ); ?>" <?php selected( $order_meta['estado_operacional'], $estado_key ); ?>><?php echo esc_html( $estado_label ); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
                                         </div>
-                                        <div class="col-12 col-xl-6">
-                                            <div class="d-flex flex-column gap-3 h-100">
-                                                <div>
-                                                    <label for="order_proveedor_id" class="form-label"><?php esc_html_e( 'Proveedor asignado', 'tradutema-crm' ); ?></label>
-                                                    <select name="proveedor_id" id="order_proveedor_id" class="form-select">
-                                                        <option value="0"><?php esc_html_e( 'Sin asignar', 'tradutema-crm' ); ?></option>
-                                                        <?php foreach ( $proveedores as $proveedor ) : ?>
-                                                            <option value="<?php echo esc_attr( $proveedor['id'] ); ?>" <?php selected( (int) $order_meta['proveedor_id'], (int) $proveedor['id'] ); ?>><?php echo esc_html( $proveedor['nombre_comercial'] ); ?></option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                    <?php if ( $order_language_pair_label ) : ?>
-                                                        <p class="form-text mb-0"><?php printf( esc_html__( 'Par de idiomas del pedido: %s', 'tradutema-crm' ), esc_html( $order_language_pair_label ) ); ?></p>
-                                                    <?php else : ?>
-                                                        <p class="form-text text-muted mb-0"><?php esc_html_e( 'El pedido no tiene un par de idiomas registrado.', 'tradutema-crm' ); ?></p>
-                                                    <?php endif; ?>
-                                                    <?php if ( $order_language_pair_label && empty( $proveedores ) ) : ?>
-                                                        <p class="text-danger small mb-0 mt-1"><?php esc_html_e( 'No hay proveedores con este par de idiomas en sus servicios.', 'tradutema-crm' ); ?></p>
-                                                    <?php endif; ?>
+                                        <div class="col-12 col-md-6 col-xl-4">
+                                            <label for="order_referencia" class="form-label"><?php esc_html_e( 'Referencia interna', 'tradutema-crm' ); ?></label>
+                                            <input type="text" name="referencia" id="order_referencia" value="<?php echo esc_attr( $order_meta['referencia'] ); ?>" class="form-control" />
+                                        </div>
+                                        <div class="col-12 col-md-6 col-xl-4">
+                                            <label for="order_nacex_albaran" class="form-label"><?php esc_html_e( 'Albarán de Nacex', 'tradutema-crm' ); ?></label>
+                                            <input type="text" name="nacex_albaran" id="order_nacex_albaran" value="<?php echo esc_attr( $order_meta['nacex_albaran'] ); ?>" class="form-control" />
+                                        </div>
+                                        <div class="col-12 col-md-6 col-xl-4">
+                                            <label for="order_exceso_palabras" class="form-label"><?php esc_html_e( 'Exceso Palabras', 'tradutema-crm' ); ?></label>
+                                            <input type="text" name="exceso_palabras" id="order_exceso_palabras" value="<?php echo esc_attr( $order_meta['exceso_palabras'] ); ?>" class="form-control" />
+                                        </div>
+                                        <div class="col-12 col-md-6 col-xl-4">
+                                            <label for="order_proveedor_id" class="form-label"><?php esc_html_e( 'Proveedor asignado', 'tradutema-crm' ); ?></label>
+                                            <select name="proveedor_id" id="order_proveedor_id" class="form-select">
+                                                <option value="0"><?php esc_html_e( 'Sin asignar', 'tradutema-crm' ); ?></option>
+                                                <?php foreach ( $proveedores as $proveedor ) : ?>
+                                                    <option value="<?php echo esc_attr( $proveedor['id'] ); ?>" <?php selected( (int) $order_meta['proveedor_id'], (int) $proveedor['id'] ); ?>><?php echo esc_html( $proveedor['nombre_comercial'] ); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <?php if ( $order_language_pair_label ) : ?>
+                                                <p class="form-text mb-0"><?php printf( esc_html__( 'Par de idiomas del pedido: %s', 'tradutema-crm' ), esc_html( $order_language_pair_label ) ); ?></p>
+                                            <?php else : ?>
+                                                <p class="form-text text-muted mb-0"><?php esc_html_e( 'El pedido no tiene un par de idiomas registrado.', 'tradutema-crm' ); ?></p>
+                                            <?php endif; ?>
+                                            <?php if ( $order_language_pair_label && empty( $proveedores ) ) : ?>
+                                                <p class="text-danger small mb-0 mt-1"><?php esc_html_e( 'No hay proveedores con este par de idiomas en sus servicios.', 'tradutema-crm' ); ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="col-12 col-md-6 col-xl-4">
+                                            <h2 class="h6 text-uppercase text-muted mb-2 tradutema-crm-provider-subtitle"><?php esc_html_e( 'Planificación y entrega', 'tradutema-crm' ); ?></h2>
+                                            <label for="order_fecha_real_pdf_date" class="form-label"><?php esc_html_e( 'Fecha y ahora Entrega real Proveedor', 'tradutema-crm' ); ?></label>
+                                            <div class="row g-2">
+                                                <div class="col-7">
+                                                    <input type="date" id="order_fecha_real_pdf_date" value="<?php echo esc_attr( $real_delivery_date ); ?>" class="form-control" />
                                                 </div>
-                                                <?php if ( $assigned_provider_details ) : ?>
-                                                    <div class="bg-light border rounded-3 p-3 tradutema-crm-provider-subcard">
-                                                        <h3 class="h6 mb-2"><?php esc_html_e( 'Datos de envío del proveedor', 'tradutema-crm' ); ?></h3>
-                                                        <?php if ( $provider_shipping_address ) : ?>
-                                                            <p class="mb-1 small"><strong><?php esc_html_e( 'Dirección de recogida', 'tradutema-crm' ); ?>:</strong> <span class="text-break"><?php echo nl2br( esc_html( $provider_shipping_address ) ); ?></span></p>
+                                                <div class="col-5">
+                                                    <select id="order_fecha_real_pdf_time" class="form-select">
+                                                        <option value=""><?php esc_html_e( 'Selecciona hora', 'tradutema-crm' ); ?></option>
+                                                        <?php foreach ( $real_delivery_time_options as $time_option ) : ?>
+                                                            <option value="<?php echo esc_attr( $time_option ); ?>" <?php selected( $real_delivery_time, $time_option ); ?>><?php echo esc_html( $time_option ); ?> h</option>
+                                                        <?php endforeach; ?>
+                                                        <?php if ( $real_delivery_time && ! in_array( $real_delivery_time, $real_delivery_time_options, true ) ) : ?>
+                                                            <option value="<?php echo esc_attr( $real_delivery_time ); ?>" selected><?php echo esc_html( $real_delivery_time ); ?> h</option>
                                                         <?php endif; ?>
-                                                        <?php if ( $provider_contact_email ) : ?>
-                                                            <p class="mb-1 small"><strong><?php esc_html_e( 'Correo de contacto', 'tradutema-crm' ); ?>:</strong> <a href="mailto:<?php echo esc_attr( $provider_contact_email ); ?>"><?php echo esc_html( $provider_contact_email ); ?></a></p>
-                                                        <?php endif; ?>
-                                                        <?php if ( $provider_contact_phone ) : ?>
-                                                            <p class="mb-0 small"><strong><?php esc_html_e( 'Teléfono de contacto', 'tradutema-crm' ); ?>:</strong> <a href="tel:<?php echo esc_attr( $provider_contact_phone ); ?>"><?php echo esc_html( $provider_contact_phone ); ?></a></p>
-                                                        <?php endif; ?>
-                                                        <?php if ( ! $provider_shipping_address && ! $provider_contact_email && ! $provider_contact_phone ) : ?>
-                                                            <p class="mb-0 text-muted small"><?php esc_html_e( 'El proveedor no tiene datos de envío registrados.', 'tradutema-crm' ); ?></p>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                <?php endif; ?>
-                                                <div class="tradutema-crm-provider-notes">
-                                                    <h2 class="h6 text-uppercase text-muted mb-2 tradutema-crm-provider-subtitle"><?php esc_html_e( 'Comentario lingüístico', 'tradutema-crm' ); ?></h2>
-                                                    <label for="order_comentario_linguistico" class="form-label"><?php esc_html_e( 'Comentario lingüístico', 'tradutema-crm' ); ?></label>
-                                                    <textarea name="comentario_linguistico" id="order_comentario_linguistico" rows="3" class="form-control"><?php echo esc_textarea( $order_meta['comentario_linguistico'] ); ?></textarea>
+                                                    </select>
                                                 </div>
                                             </div>
+                                            <input type="hidden" name="fecha_real_entrega_pdf" id="order_fecha_real_pdf" value="<?php echo esc_attr( $real_delivery_input_value ); ?>" />
+                                            <script>
+                                                document.addEventListener('DOMContentLoaded', function () {
+                                                    const realDeliveryDate = document.getElementById('order_fecha_real_pdf_date');
+                                                    const realDeliveryTime = document.getElementById('order_fecha_real_pdf_time');
+                                                    const realDeliveryField = document.getElementById('order_fecha_real_pdf');
+
+                                                    if (!realDeliveryDate || !realDeliveryTime || !realDeliveryField) {
+                                                        return;
+                                                    }
+
+                                                    const syncRealDeliveryValue = () => {
+                                                        const dateValue = realDeliveryDate.value;
+                                                        const timeValue = realDeliveryTime.value;
+
+                                                        realDeliveryField.value = dateValue && timeValue ? `${dateValue}T${timeValue}` : '';
+                                                    };
+
+                                                    realDeliveryDate.addEventListener('change', syncRealDeliveryValue);
+                                                    realDeliveryTime.addEventListener('change', syncRealDeliveryValue);
+
+                                                    syncRealDeliveryValue();
+                                                });
+                                            </script>
+                                        </div>
+                                        <?php if ( $assigned_provider_details ) : ?>
+                                            <div class="col-12 col-xl-8">
+                                                <div class="bg-light border rounded-3 p-3 tradutema-crm-provider-subcard">
+                                                    <h3 class="h6 mb-2"><?php esc_html_e( 'Datos de envío del proveedor', 'tradutema-crm' ); ?></h3>
+                                                    <?php if ( $provider_shipping_address ) : ?>
+                                                        <p class="mb-1 small"><strong><?php esc_html_e( 'Dirección de recogida', 'tradutema-crm' ); ?>:</strong> <span class="text-break"><?php echo nl2br( esc_html( $provider_shipping_address ) ); ?></span></p>
+                                                    <?php endif; ?>
+                                                    <?php if ( $provider_contact_email ) : ?>
+                                                        <p class="mb-1 small"><strong><?php esc_html_e( 'Correo de contacto', 'tradutema-crm' ); ?>:</strong> <a href="mailto:<?php echo esc_attr( $provider_contact_email ); ?>"><?php echo esc_html( $provider_contact_email ); ?></a></p>
+                                                    <?php endif; ?>
+                                                    <?php if ( $provider_contact_phone ) : ?>
+                                                        <p class="mb-0 small"><strong><?php esc_html_e( 'Teléfono de contacto', 'tradutema-crm' ); ?>:</strong> <a href="tel:<?php echo esc_attr( $provider_contact_phone ); ?>"><?php echo esc_html( $provider_contact_phone ); ?></a></p>
+                                                    <?php endif; ?>
+                                                    <?php if ( ! $provider_shipping_address && ! $provider_contact_email && ! $provider_contact_phone ) : ?>
+                                                        <p class="mb-0 text-muted small"><?php esc_html_e( 'El proveedor no tiene datos de envío registrados.', 'tradutema-crm' ); ?></p>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                        <div class="col-12 col-xl-6 tradutema-crm-provider-notes">
+                                            <h2 class="h6 text-uppercase text-muted mb-2 tradutema-crm-provider-subtitle"><?php esc_html_e( 'Comentario interno', 'tradutema-crm' ); ?></h2>
+                                            <label for="order_comentario" class="form-label"><?php esc_html_e( 'Comentario interno', 'tradutema-crm' ); ?></label>
+                                            <textarea name="comentario_interno" id="order_comentario" rows="3" class="form-control"><?php echo esc_textarea( $order_meta['comentario_interno'] ); ?></textarea>
+                                        </div>
+                                        <div class="col-12 col-xl-6 tradutema-crm-provider-notes">
+                                            <h2 class="h6 text-uppercase text-muted mb-2 tradutema-crm-provider-subtitle"><?php esc_html_e( 'Comentario lingüístico', 'tradutema-crm' ); ?></h2>
+                                            <label for="order_comentario_linguistico" class="form-label"><?php esc_html_e( 'Comentario lingüístico', 'tradutema-crm' ); ?></label>
+                                            <textarea name="comentario_linguistico" id="order_comentario_linguistico" rows="3" class="form-control"><?php echo esc_textarea( $order_meta['comentario_linguistico'] ); ?></textarea>
                                         </div>
                                     </div>
                                 </div>
