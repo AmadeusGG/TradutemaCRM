@@ -7088,6 +7088,8 @@ private function ensure_drive_permission( $folder_id, $token ) {
             return '';
         }
 
+        $shipping_phone = $this->get_order_shipping_phone( $order, $order->get_address( 'shipping' ) );
+
         $parts = array(
             trim( (string) $order->get_shipping_first_name() ),
             trim( (string) $order->get_shipping_address_1() ),
@@ -7095,6 +7097,10 @@ private function ensure_drive_permission( $folder_id, $token ) {
             trim( (string) $order->get_shipping_city() ),
             trim( (string) $order->get_shipping_country() ),
         );
+
+        if ( '' !== $shipping_phone ) {
+            $parts[] = sprintf( __( 'Número de teléfono: %s', 'tradutema-crm' ), $shipping_phone );
+        }
 
         $parts = array_values( array_filter( $parts, static function ( $value ) {
             return '' !== $value;
@@ -7124,6 +7130,7 @@ private function ensure_drive_permission( $folder_id, $token ) {
         $candidates[] = tradutema_array_get( $shipping_data, 'phone', '' );
         $candidates[] = $order->get_meta( '_shipping_phone', true );
         $candidates[] = $order->get_meta( 'shipping_phone', true );
+        $candidates[] = $order->get_meta( '_shipping_wooccm10', true );
         $candidates[] = $this->find_order_item_meta_value(
             $order,
             array( 'Número de teléfono', 'Numero de telefono', 'Teléfono', 'Telefono' )
