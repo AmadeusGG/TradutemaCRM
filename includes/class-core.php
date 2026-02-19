@@ -1668,7 +1668,7 @@ JS;
                         </div>
                     </div>
 
-                    <div class="col-12 col-sm-6 col-xl-2 col-xxl-3">
+                    <div class="col-12 col-sm-6 col-xl-2 col-xxl-2">
                         <div class="tradutema-crm-filter-group tradutema-crm-filter-group--providers">
                             <div class="row g-3">
                                 <div class="col-12">
