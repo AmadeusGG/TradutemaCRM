@@ -2633,15 +2633,6 @@ JS;
                                 </div>
                             </div>
 
-                            <div class="d-flex flex-wrap gap-2 mb-4">
-                                <?php if ( $order_edit_url ) : ?>
-                                    <a class="btn btn-sm btn-outline-secondary" href="<?php echo esc_url( $order_edit_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'WOO', 'tradutema-crm' ); ?></a>
-                                <?php endif; ?>
-                                <?php if ( $gdrive_url ) : ?>
-                                    <a class="btn btn-sm btn-outline-success" href="<?php echo esc_url( $gdrive_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'GDrive', 'tradutema-crm' ); ?></a>
-                                <?php endif; ?>
-                            </div>
-
                             <form method="post" class="row g-3 tradutema-crm-section tradutema-crm-section-provider tradutema-crm-provider-grid" id="tradutema-crm-order-form">
                                 <?php wp_nonce_field( 'tradutema_crm_update_order' ); ?>
                                 <input type="hidden" name="tradutema_crm_action" value="update_order" />
@@ -2764,8 +2755,14 @@ JS;
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-12 d-flex justify-content-end">
+                                <div class="col-12 d-flex justify-content-end align-items-center flex-wrap gap-2">
                                     <button type="submit" class="btn btn-primary px-4"><?php esc_html_e( 'Guardar cambios', 'tradutema-crm' ); ?></button>
+                                    <?php if ( $order_edit_url ) : ?>
+                                        <a class="btn btn-sm btn-outline-secondary" href="<?php echo esc_url( $order_edit_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'WOO', 'tradutema-crm' ); ?></a>
+                                    <?php endif; ?>
+                                    <?php if ( $gdrive_url ) : ?>
+                                        <a class="btn btn-sm btn-outline-success" href="<?php echo esc_url( $gdrive_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'GDrive', 'tradutema-crm' ); ?></a>
+                                    <?php endif; ?>
                                 </div>
                             </form>
                             <div class="tradutema-crm-section tradutema-crm-section-email mt-4">
